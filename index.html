@@ -3,31 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zoomable Circle</title>
+    <title>Physics Simulation</title>
     <style>
         body {
             margin: 0;
             overflow: hidden;
         }
 
-        svg {
+        canvas {
             display: block;
         }
     </style>
 </head>
 <body>
-    <svg width="100vw" height="100vh" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="50" cy="50" r="5" fill="blue" />
-    </svg>
+    <canvas id="physicsCanvas" width="800" height="600"></canvas>
 
     <script>
-        let scale = 1;
+        const canvas = document.getElementById('physicsCanvas');
+        const ctx = canvas.getContext('2d');
 
-        document.addEventListener('wheel', function (e) {
-            e.preventDefault();
-            scale = e.deltaY > 0 ? scale * 1.1 : scale * 0.9;
-            document.querySelector('circle').setAttribute('r', scale);
+        const ball = {
+            x: 50,
+            y: 50,
+            radius: 20,
+            color: 'blue',
+            velocityY: 0,
+            gravity: 0.5,
+            jumpStrength: -10
+        };
+
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI);
+            ctx.fillStyle = ball.color;
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function update() {
+            // Update ball position based on velocity
+            ball.y += ball.velocityY;
+
+            // Apply gravity
+            ball.velocityY += ball.gravity;
+
+            // Check if the ball hits the bottom of the canvas
+            if (ball.y + ball.radius > canvas.height) {
+                ball.y = canvas.height - ball.radius;
+                ball.velocityY = 0;
+            }
+        }
+
+        function jump() {
+            // Check if the ball is on the ground before jumping
+            if (ball.y + ball.radius === canvas.height) {
+                ball.velocityY = ball.jumpStrength;
+            }
+        }
+
+        function gameLoop() {
+            update();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBall();
+            requestAnimationFrame(gameLoop);
+        }
+
+        document.addEventListener('keydown', function (e) {
+            if (e.code === 'Space') {
+                jump();
+            }
         });
+
+        gameLoop();
     </script>
 </body>
 </html>
