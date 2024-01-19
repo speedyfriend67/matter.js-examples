@@ -8,10 +8,12 @@
 <body>
     <div>
         <button onclick="loadExample('circleStack')">Circle Stack</button>
-        <button onclick="loadExample('cloth')">cloth</button>
-        <button onclick="loadExample('ballpool')">not working</button>
-        <button onclick="loadExample('ballpool')">ballpool</button>
+        <button onclick="loadExample('cloth')">Cloth</button>
+        <button onclick="loadExample('ballpool')">Ball Pool</button>
         <button onclick="loadExample('doublePendulum')">Double Pendulum</button>
+    </div>
+    <div>
+        <button onclick="removeOneScene()">Remove One Scene</button>
     </div>
     <div id="exampleContainer"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.17.1/matter.min.js"></script>
@@ -19,13 +21,25 @@
     <script src="circleStack.js"></script>
     <script src="cloth.js"></script>
     <script src="ballpool.js"></script>
-    <script src="ballpool.js"></script>
     <script src="doublePendulum.js"></script>
     <script>
+        var currentExample;
+
         function loadExample(exampleName) {
+            if (currentExample) {
+                currentExample.stop();
+            }
+
             document.getElementById('exampleContainer').innerHTML = '';
             if (Example[exampleName]) {
-                Example[exampleName]();
+                currentExample = Example[exampleName]();
+            }
+        }
+
+        function removeOneScene() {
+            if (currentExample) {
+                currentExample.stop();
+                document.getElementById('exampleContainer').innerHTML = '';
             }
         }
     </script>
