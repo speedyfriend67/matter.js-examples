@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random Size Animation</title>
+    <title>Simple Rendering Engine</title>
     <style>
         body {
             margin: 0;
@@ -16,69 +16,49 @@
     </style>
 </head>
 <body>
-    <canvas id="animationCanvas" width="800" height="600"></canvas>
+    <canvas id="renderingCanvas" width="800" height="600"></canvas>
 
     <script>
-        const canvas = document.getElementById('animationCanvas');
+        const canvas = document.getElementById('renderingCanvas');
         const ctx = canvas.getContext('2d');
 
-        const shapes = [];
+        function renderShape(shape) {
+            ctx.beginPath();
+            ctx.fillStyle = shape.color;
+            
+            if (shape.type === 'circle') {
+                ctx.arc(shape.x, shape.y, shape.radius, 0, 2 * Math.PI);
+            } else if (shape.type === 'rectangle') {
+                ctx.fillRect(shape.x, shape.y, shape.width, shape.height);
+            }
+            
+            ctx.fill();
+            ctx.closePath();
+        }
 
-        function generateRandomShape() {
-            const shape = {
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                size: Math.random() * 30 + 10, // Initial size between 10 and 40
-                growthRate: Math.random() * 2 + 1, // Growth rate between 1 and 3
-                color: getRandomColor()
+        function render() {
+            const circle = {
+                type: 'circle',
+                x: 100,
+                y: 100,
+                radius: 30,
+                color: 'blue'
             };
-            shapes.push(shape);
+
+            const rectangle = {
+                type: 'rectangle',
+                x: 200,
+                y: 200,
+                width: 50,
+                height: 80,
+                color: 'green'
+            };
+
+            renderShape(circle);
+            renderShape(rectangle);
         }
 
-        function getRandomColor() {
-            const letters = '0123456789ABCDEF';
-            let color = '#';
-            for (let i = 0; i < 6; i++) {
-                color += letters[Math.floor(Math.random() * 16)];
-            }
-            return color;
-        }
-
-        function update() {
-            for (const shape of shapes) {
-                shape.size += shape.growthRate;
-
-                // Reduce size when it reaches a certain limit
-                if (shape.size > 60 || shape.size < 5) {
-                    shape.growthRate = -shape.growthRate;
-                }
-            }
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            for (const shape of shapes) {
-                ctx.beginPath();
-                ctx.arc(shape.x, shape.y, shape.size, 0, 2 * Math.PI);
-                ctx.fillStyle = shape.color;
-                ctx.fill();
-                ctx.closePath();
-            }
-        }
-
-        function gameLoop() {
-            update();
-            draw();
-            requestAnimationFrame(gameLoop);
-        }
-
-        // Generate initial shapes
-        for (let i = 0; i < 5; i++) {
-            generateRandomShape();
-        }
-
-        gameLoop();
+        render();
     </script>
 </body>
 </html>
