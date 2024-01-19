@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Looping Sierpinski Triangle</title>
+    <title>Sierpinski Triangle</title>
     <style>
         canvas {
-            border: 1px solid black;
+            display: block;
+            margin: 0 auto;
         }
     </style>
 </head>
 <body>
-    <canvas id="canvas" width="400" height="400"></canvas>
+    <canvas id="canvas"></canvas>
 
     <script>
         const canvas = document.getElementById('canvas');
@@ -24,19 +25,19 @@
             ctx.stroke();
         }
 
-        function drawSierpinski(x, y, size, depth) {
-            if (depth === 0) {
-                drawTriangle(x, y, size);
-            } else {
-                drawSierpinski(x, y, size / 2, depth - 1);
-                drawSierpinski(x + size / 2, y, size / 2, depth - 1);
-                drawSierpinski(x + size / 4, y + size / 2, size / 2, depth - 1);
+        function generateTriangle(x, y, size) {
+            drawTriangle(x, y, size);
+
+            if (size > 10) {
+                generateTriangle(x, y, size / 2);
+                generateTriangle(x + size / 2, y, size / 2);
+                generateTriangle(x + size / 4, y + size / 2, size / 2);
             }
         }
 
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawSierpinski(0, 0, canvas.width, 5);
+            generateTriangle(0, 0, canvas.width);
             requestAnimationFrame(animate);
         }
 
