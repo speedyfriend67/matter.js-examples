@@ -4,48 +4,56 @@ Example.cloth = function() {
     var Engine = Matter.Engine,
         Render = Matter.Render,
         Runner = Matter.Runner,
-        Body = Matter.Body,
-        Composites = Matter.Composites,
+        World = Matter.World,
+        Bodies = Matter.Bodies,
         MouseConstraint = Matter.MouseConstraint,
         Mouse = Matter.Mouse,
-        Composite = Matter.Composite,
-        Bodies = Matter.Bodies;
+        Constraint = Matter.Constraint;
 
-    // create engine
+    // Create engine
     var engine = Engine.create(),
         world = engine.world;
 
-    // create renderer
+    // Create renderer
     var render = Render.create({
-        element: document.body,
+        element: document.getElementById('exampleContainer'),
         engine: engine,
         options: {
             width: 800,
-            height: 600
+            height: 600,
+            wireframes: false
         }
     });
 
     Render.run(render);
 
-    // create runner
+    // Create runner
     var runner = Runner.create();
     Runner.run(runner, engine);
 
-    // see cloth function defined later in this file
-    var cloth = Example.cloth.cloth(200, 200, 20, 12, 5, 5, false, 8);
+    // Create cloth
+    var group = Body.nextGroup(true);
 
-    for (var i = 0; i < 20; i++) {
+    var cloth = Composites.softBody(200, 200, 20, 12, 5, 5, false, 8, function (x, y) {
+        return Bodies.circle(x, y, 12, {
+            collisionFilter: { group: group },
+            friction: 0.0001,
+            restitution: 0.5,
+            density: 0.002
+        });
+    });
+
+    for (var i = 0; i < cloth.bodies.length; i += 1) {
         cloth.bodies[i].isStatic = true;
     }
 
-    Composite.add(world, [
+    World.add(world, [
         cloth,
-        Bodies.circle(300, 500, 80, { isStatic: true, render: { fillStyle: '#060a19' }}),
-        Bodies.rectangle(500, 480, 80, 80, { isStatic: true, render: { fillStyle: '#060a19' }}),
-        Bodies.rectangle(400, 609, 800, 50, { isStatic: true })
+        Bodies.circle(300, 500, 80, { isStatic: true }),
+        Bodies.rectangle(500, 480, 80, 80, { isStatic: true })
     ]);
 
-    // add mouse control
+    // Add mouse control
     var mouse = Mouse.create(render.canvas),
         mouseConstraint = MouseConstraint.create(engine, {
             mouse: mouse,
@@ -57,69 +65,46 @@ Example.cloth = function() {
             }
         });
 
-    Composite.add(world, mouseConstraint);
+    World.add(world, mouseConstraint);
 
-    // keep the mouse in sync with rendering
     render.mouse = mouse;
 
-    // fit the render viewport to the scene
+    // Handle mouse clicks to apply an impulse to circles
+    Events.on(mouseConstraint, 'mousedown', function (event) {
+        var clickedBodies = Query.point(world.bodies, mouse.position);
+
+        for (var i = 0; i < clickedBodies.length; i++) {
+            var body = clickedBodies[i];
+            if (body.circleRadius) { // Check if it's a circle
+                Body.applyForce(body, body.position, { x: 0.02, y: -0.02 }); // Apply impulse
+            }
+        }
+    });
+
+    // Fit the render viewport to the scene
     Render.lookAt(render, {
         min: { x: 0, y: 0 },
         max: { x: 800, y: 600 }
     });
 
-    // context for MatterTools.Demo
     return {
         engine: engine,
         runner: runner,
         render: render,
         canvas: render.canvas,
-        stop: function() {
-            Matter.Render.stop(render);
-            Matter.Runner.stop(runner);
+        stop: function () {
+            Render.stop(render);
+            Runner.stop(runner);
         }
     };
 };
 
 Example.cloth.title = 'Cloth';
-Example.cloth.for = '>=0.14.2';
-
-/**
-* Creates a simple cloth like object.
-* @method cloth
-* @param {number} xx
-* @param {number} yy
-* @param {number} columns
-* @param {number} rows
-* @param {number} columnGap
-* @param {number} rowGap
-* @param {boolean} crossBrace
-* @param {number} particleRadius
-* @param {} particleOptions
-* @param {} constraintOptions
-* @return {composite} A new composite cloth
-*/
-Example.cloth.cloth = function(xx, yy, columns, rows, columnGap, rowGap, crossBrace, particleRadius, particleOptions, constraintOptions) {
-    var Body = Matter.Body,
-        Bodies = Matter.Bodies,
-        Common = Matter.Common,
-        Composites = Matter.Composites;
-
-    var group = Body.nextGroup(true);
-    particleOptions = Common.extend({ inertia: Infinity, friction: 0.00001, collisionFilter: { group: group }, render: { visible: false }}, particleOptions);
-    constraintOptions = Common.extend({ stiffness: 0.06, render: { type: 'line', anchors: false } }, constraintOptions);
-
-    var cloth = Composites.stack(xx, yy, columns, rows, columnGap, rowGap, function(x, y) {
-        return Bodies.circle(x, y, particleRadius, particleOptions);
-    });
-
-    Composites.mesh(cloth, columns, rows, crossBrace, constraintOptions);
-
-    cloth.label = 'Cloth Body';
-
-    return cloth;
-};
+Example.cloth.for = '>0.14.2';
 
 if (typeof module !== 'undefined') {
     module.exports = Example.cloth;
 }
+
+// Run the example
+Example.cloth();
