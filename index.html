@@ -3,12 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Double Pendulum</title>
+    <title>Matter.js Examples</title>
 </head>
 <body>
-    <canvas id="engineCanvas" width="800" height="600"></canvas>
+    <div>
+        <button onclick="loadExample('boxStack')">Box Stack</button>
+        <button onclick="loadExample('mouseInteraction')">Mouse Interaction</button>
+        <button onclick="loadExample('compositeBodies')">Composite Bodies</button>
+        <button onclick="loadExample('chainsConstraints')">Chains & Constraints</button>
+        <button onclick="loadExample('doublePendulum')">Double Pendulum</button>
+    </div>
+    <div id="exampleContainer"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.17.1/matter.min.js"></script>
+    <script src="boxStack.js"></script>
+    <script src="mouseInteraction.js"></script>
+    <script src="compositeBodies.js"></script>
+    <script src="chainsConstraints.js"></script>
     <script src="doublePendulum.js"></script>
+    <script>
+        function loadExample(exampleName) {
+            document.getElementById('exampleContainer').innerHTML = '';
+            if (Example[exampleName]) {
+                Example[exampleName]();
+            }
+        }
+    </script>
 </body>
 </html>
-
