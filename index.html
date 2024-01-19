@@ -3,40 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Rendering Engine</title>
+    <title>Simple Rendering and Physics Engine</title>
     <style>
         body {
             margin: 0;
             overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
 
         canvas {
-            display: block;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            margin: 10px;
+            padding: 8px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <canvas id="renderingCanvas" width="800" height="600"></canvas>
+    <canvas id="engineCanvas" width="800" height="600"></canvas>
+    <button onclick="switchEngine('rendering')">Rendering</button>
+    <button onclick="switchEngine('physics')">Physics</button>
 
     <script>
-        const canvas = document.getElementById('renderingCanvas');
+        const canvas = document.getElementById('engineCanvas');
         const ctx = canvas.getContext('2d');
+        let engine = 'rendering'; // Default to rendering engine
 
-        function renderShape(shape) {
-            ctx.beginPath();
-            ctx.fillStyle = shape.color;
-            
-            if (shape.type === 'circle') {
-                ctx.arc(shape.x, shape.y, shape.radius, 0, 2 * Math.PI);
-            } else if (shape.type === 'rectangle') {
-                ctx.fillRect(shape.x, shape.y, shape.width, shape.height);
-            }
-            
-            ctx.fill();
-            ctx.closePath();
+        const ball = {
+            x: 100,
+            y: 100,
+            radius: 20,
+            color: 'blue',
+            velocityX: 2,
+            velocityY: 0,
+            gravity: 0.1
+        };
+
+        function switchEngine(newEngine) {
+            engine = newEngine;
+            reset();
         }
 
-        function render() {
+        function updatePhysics() {
+            // Update ball position based on velocity
+            ball.x += ball.velocityX;
+            ball.y += ball.velocityY;
+
+            // Apply gravity
+            ball.velocityY += ball.gravity;
+
+            // Bounce off the walls
+            if (ball.x - ball.radius < 0 || ball.x + ball.radius > canvas.width) {
+                ball.velocityX = -ball.velocityX;
+            }
+
+            // Bounce off the floor
+            if (ball.y + ball.radius > canvas.height) {
+                ball.y = canvas.height - ball.radius;
+                ball.velocityY = -ball.velocityY * 0.8; // Bounce with reduced energy
+            }
+        }
+
+        function renderRenderingEngine() {
             const circle = {
                 type: 'circle',
                 x: 100,
@@ -58,7 +92,46 @@
             renderShape(rectangle);
         }
 
-        render();
+        function renderShape(shape) {
+            ctx.beginPath();
+            ctx.fillStyle = shape.color;
+            
+            if (shape.type === 'circle') {
+                ctx.arc(shape.x, shape.y, shape.radius, 0, 2 * Math.PI);
+            } else if (shape.type === 'rectangle') {
+                ctx.fillRect(shape.x, shape.y, shape.width, shape.height);
+            }
+            
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function reset() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (engine === 'rendering') {
+                renderRenderingEngine();
+            } else if (engine === 'physics') {
+                gameLoop();
+            }
+        }
+
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI);
+            ctx.fillStyle = ball.color;
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function gameLoop() {
+            updatePhysics();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBall();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Initial rendering
+        reset();
     </script>
 </body>
 </html>
