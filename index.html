@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Physics Simulation</title>
+    <title>Random Size Animation</title>
     <style>
         body {
             margin: 0;
@@ -16,65 +16,70 @@
     </style>
 </head>
 <body>
-    <canvas id="physicsCanvas" width="800" height="600"></canvas>
+    <canvas id="animationCanvas" width="800" height="600"></canvas>
 
     <script>
-        const canvas = document.getElementById('physicsCanvas');
+        const canvas = document.getElementById('animationCanvas');
         const ctx = canvas.getContext('2d');
 
-        const ball = {
-            x: 50,
-            y: 50,
-            radius: 20,
-            color: 'blue',
-            velocityY: 0,
-            gravity: 0.5,
-            jumpStrength: -10
-        };
+        const shapes = [];
 
-        function drawBall() {
-            ctx.beginPath();
-            ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI);
-            ctx.fillStyle = ball.color;
-            ctx.fill();
-            ctx.closePath();
+        function generateRandomShape() {
+            const shape = {
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 30 + 10, // Initial size between 10 and 40
+                growthRate: Math.random() * 2 + 1, // Growth rate between 1 and 3
+                color: getRandomColor()
+            };
+            shapes.push(shape);
+        }
+
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
         }
 
         function update() {
-            // Update ball position based on velocity
-            ball.y += ball.velocityY;
+            for (const shape of shapes) {
+                shape.size += shape.growthRate;
 
-            // Apply gravity
-            ball.velocityY += ball.gravity;
-
-            // Check if the ball hits the bottom of the canvas
-            if (ball.y + ball.radius > canvas.height) {
-                ball.y = canvas.height - ball.radius;
-                ball.velocityY = 0;
+                // Reduce size when it reaches a certain limit
+                if (shape.size > 60 || shape.size < 5) {
+                    shape.growthRate = -shape.growthRate;
+                }
             }
         }
 
-        function jump() {
-            // Check if the ball is on the ground before jumping
-            if (ball.y + ball.radius === canvas.height) {
-                ball.velocityY = ball.jumpStrength;
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (const shape of shapes) {
+                ctx.beginPath();
+                ctx.arc(shape.x, shape.y, shape.size, 0, 2 * Math.PI);
+                ctx.fillStyle = shape.color;
+                ctx.fill();
+                ctx.closePath();
             }
         }
 
         function gameLoop() {
             update();
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawBall();
+            draw();
             requestAnimationFrame(gameLoop);
         }
 
-        document.addEventListener('keydown', function (e) {
-            if (e.code === 'Space') {
-                jump();
-            }
-        });
+        // Generate initial shapes
+        for (let i = 0; i < 5; i++) {
+            generateRandomShape();
+        }
 
         gameLoop();
     </script>
 </body>
 </html>
+
