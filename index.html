@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Looping Sierpinski Triangle</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="400" height="400"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        function drawTriangle(x, y, size) {
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + size, y);
+            ctx.lineTo(x + size / 2, y + size);
+            ctx.closePath();
+            ctx.stroke();
+        }
+
+        function drawSierpinski(x, y, size, depth) {
+            if (depth === 0) {
+                drawTriangle(x, y, size);
+            } else {
+                drawSierpinski(x, y, size / 2, depth - 1);
+                drawSierpinski(x + size / 2, y, size / 2, depth - 1);
+                drawSierpinski(x + size / 4, y + size / 2, size / 2, depth - 1);
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawSierpinski(0, 0, canvas.width, 5);
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
